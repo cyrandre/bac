@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container col-lg-4 px-4">
+    <main class="form-signin w-100 m-auto">
+    <form role="form" method="post" action="">
+        {{ form.csrf_token }}
+        <h1 class="h3 mb-3 fw-normal text-center">Propriétés</h1>
+        
+        <div class="mb-3">
+            {{form.nquestions.label(class = "col-form-label")}}
+            {{form.nquestions(class = "form-control",type ="number")}}
+        </div>
+
+        <div class="form-check mb-3">
+            {{ form.clock.label(class = "form-check-label") }}
+            {{ form.clock(class = "form-check-input") }}
+        </div>
+
+        <div class="mb-3">
+            {{form.nquestions(class = "form-control",type ="number")}}
+        </div>
+
+        <div class="form-check mb-3">
+            {{ form.multiple_choice.label(class = "form-check-label") }}
+            {{ form.multiple_choice(class = "form-check-input") }}
+        </div>
+
+        <div class="form-check mb-3">
+            {{ form.dropdown_menu.label(class = "form-check-label") }}
+            {{ form.dropdown_menu(class = "form-check-input") }}
+        </div>
+        <div class="form-check mb-3">
+            {{ form.open_question.label(class = "form-check-label") }}
+            {{ form.open_question(class = "form-check-input") }}
+        </div>
+
+        <div class="form-check mb-3">
+            {{ form.antibiogram.label(class = "form-check-label") }}
+            {{ form.antibiogram(class = "form-check-input") }}
+        </div>
+
+        <div class="form-check mb-3">
+            {{ form.direct_exam.label(class = "form-check-label") }}
+            {{ form.direct_exam(class = "form-check-input") }}
+        </div>
+
+        <div class="form-check mb-3">
+            {{ form.culture.label(class = "form-check-label") }}
+            {{ form.culture(class = "form-check-input") }}
+        </div>
+        <div class="d-grid gap-4 d-md-flex justify-content-md-end">
+        <a type="button" class="btn btn-secondary" href="{{ url_for('session.index')}}">Annuler</a>
+        <button class="btn btn-primary" type="submit">Enregistrer</button>
+        </div>
+    </form>
+    </main>
+</div>
+{% endblock %}

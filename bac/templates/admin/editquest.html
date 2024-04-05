@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% block head %}
+<!-- <script src="{{url_for('static',filename ='js/alpine.min.js')}}" defer="defer"></script> --->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}
+{% block content %}
+{% if current_user.is_admin == 1 %}
+<header>
+    <nav class="navbar d-flex flex-wrap justify-content-between px-4 py-2 navbar-dark bg-dark">
+        <a href="#" class="text-decoration-none">
+            <img src="{{url_for('static',filename='images/logo.svg')}}" alg="logo" width="40" height="40" class="d-inline-block align-text-top">
+        </a>
+    </nav>
+</header>
+<div class="container py-5">
+    <form method="post" class="form" enctype="multipart/form-data" x-data="Form()" x-init="initForm({{question.id or 0}},{{ question.image }})" @submit.prevent="submit">
+        <div class="row mb-3">
+            <label for="title" class="col-md-2 col-form-label col-form-label-lg">Titre</label>
+            <div class="col-md-10">
+                <input class="form-control form-control-lg" type="text" id="title" name="title" placeholder="Titre" 
+                    value="{{ request.form['title'] or question['title'] }}" required >
+            </div>
+        </div>
+        <div class="row mb-3">
+            <label for="body" class="col-md-2 col-form-label col-form-label-lg">Détails</label>
+            <div class="col-md-10">
+                <textarea class="form-control form-control-lg" type="text" id="body" name="body" placeholder="Détails" rows="3">{{ (request.form['body'] or question['body']) | trim("\n\t\r ") }}</textarea>
+            </div>
+        </div>      
+        <div class="row mb-3">
+            <label for="imgDropBox" class="col-md-2 col-form-label col-form-label-lg">Images</label>
+            <div class="col-md-10">                            
+                <div class="row row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3">
+                    <template x-for="(image,index) in images" :key="index">
+                        <div class = "card shadow mx-2">                         
+                            <img :src="image.path" class="card-img-top d-block mx-lg-auto img-fluid" alt="" width="250" loading="lazy"/>
+                            <div class = "card-body d-flex">
+                                <button class="btn btn-sm btn-outline-secondary mt-auto" type="button" @click="remove(index)">Effacer</button>
+                            </div>
+                        </div>
+                    </template >                    
+                    <div :class = "{'dragover': dragover}" class = "card shadow mx-2" id="imgDropBox">                    
+                        <div class="card-body d-flex align-items-center justify-content-center"                             
+                            @drop.prevent="drop"
+                            @dragover.prevent="dragover=true" 
+                            @dragleave.prevent="dragover=false">
+                            <p class="card-text">Drop images here</p>                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="legend" class="col-md-2 col-form-label col-form-label-lg">Légende</label>
+            <div class="col-md-10">
+                <input class="form-control form-control-lg " type="text" id="legend" name="legend" placeholder="Légende" 
+                value ="{{ request.form['legend'] or question['legend'] }}">
+            </div>
+        </div>
+        <div class="row mb-3" x-data="Data()" x-init="init({{ request.form['choice'] or question['choice'] }})">
+            <label for="choice0" class="col-md-2 col-form-label col-form-label-lg">Réponses</label>
+            <div class="col-md-10">
+                <template x-if="items.length > 1">
+                    <div>
+                        <template x-for="(item,index) in items" :key="index">
+                            <div class="input-group mb-3">
+                                <input class="form-control form-control-lg " type="text" :id="`choice${index}`" :name="`choice${index}`" :placeholder="`Réponse ${index+1}`" x-model="item.value" required>                        
+                                <button class="btn btn-outline-secondary" type="button" @click="add()" x-show="index === items.length-1 && items.length < 5">+</button>                             
+                                <button class="btn btn-outline-secondary" type="button" @click="remove(index)">-</button>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template x-if="items.length === 1">
+                    <div class="input-group mb-3">
+                        <input class="form-control form-control-lg " type="text" id="choice0" name="choice0" placeholder="Réponse 1" x-model="items[0].value">                        
+                        <button class="btn btn-outline-secondary" type="button" @click="add()">+</button>    
+                    </div>
+                </template>
+            </div>
+        </div>
+        <div class="row mb-3" x-data="Data()" x-init="init({{ request.form['answer'] or question['answer'] }})">
+            <label for="answer0" class="col-md-2 col-form-label col-form-label-lg">Solutions</label>
+            <div class="col-md-10">  
+                <template x-if="items.length > 1">
+                    <div>
+                        <template x-for="(item,index) in items" :key="index">
+                            <div class="input-group mb-3">
+                                <input class="form-control form-control-lg " type="text" :id="`answer${index}`" :name="`answer${index}`" :placeholder="`Solution ${index+1}`" x-model="item.value" required>                        
+                                <button class="btn btn-outline-secondary" type="button" @click="add()" x-show="index === items.length-1 && items.length < 6">+</button>                             
+                                <button class="btn btn-outline-secondary" type="button" @click="remove(index)">-</button>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template x-if="items.length === 1">
+                    <div class="input-group mb-3">
+                        <input class="form-control form-control-lg " type="text" id="answer0" name="answer0" placeholder="Solution 1" x-model="items[0].value" required>                        
+                        <button class="btn btn-outline-secondary" type="button" @click="add()">+</button>    
+                    </div>
+                </template>
+            </div>
+        </div>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a type="button" class="btn btn-secondary me-md-2" href="{{ url_for('admin.viewquest') }}">Annuler</a>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+    </form>    
+</div>
+{% endif %}
+{% endblock %}
+
+{% block script %}
+<script>
+
+    function Form(){
+        return {
+            images:[],
+            dragover: false,
+            id: 1,
+
+            initForm(id,images){
+                this.id = id
+                if(images != null) {
+                    for(item of images) {
+                        this.images.push({path: item.path});   
+                    }
+                }
+            },
+            drop(event){
+                this.dragover = false
+                if(!event.dataTransfer.items) return
+                for(item of event.dataTransfer.items) {
+                    if(item.kind === 'file') {
+                        const file = item.getAsFile()
+                        if(file && file.type.match('image.*')) {
+                            this.addFile(file)
+                        }
+                    }
+                }
+            },
+            addFile(file){
+                let reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onloadend = () => {
+                    this.images.push({path: reader.result, 
+                        file: file});
+                }
+            },
+            remove(index){
+                this.images.splice(index,1);
+            },
+
+            data() {
+                const inputs = Array.from(this.$el.querySelectorAll("input, textarea"));
+                const data = inputs.reduce(
+                    (object, key) => ({ ...object, [key.name]: key.value }),
+                    {}
+                );
+                return data;
+            },
+            submit(){
+                const data = this.data()
+                let formData = new FormData()
+
+                for(const [key,value] of Object.entries(data)) {
+                    formData.append(key,value)
+                }
+                let count = 0
+                for(image of this.images) {
+                    const name = `image${count++}`                                        
+                    if(image.file != null){
+                        formData.append(name,image.file)
+                    } else {
+                        formData.append(name,image.path)
+                    }
+                }
+                this.send(formData)
+            },
+            async send(formData){
+                try {
+
+                    const response = await fetch(`/admin/${this.id}/update`, {
+                        method: 'POST',
+                        body: formData,
+                        })
+                    if (response.ok) {
+                        console.log('File uploaded successfully')
+                    } else {
+                        console.error('File upload failed', response)
+                    }
+                } catch (error) {
+                    console.error('Error uploading file', error)
+                }
+                window.location.href = "/admin/viewquest"
+            },
+        }
+    }
+
+    function Data(){
+        return {
+            items:[{value:''}],
+            init(data){
+                if(data != null) {
+                    this.items = [];
+                for(item of data) {
+                    this.items.push({value: item.title});                    
+                }
+                if(this.items.length == 0)
+                    this.items = [{value:''}]
+                }
+            },
+            add(){
+                this.items.push({value: ''});            
+            },
+            remove(index){
+                this.items.splice(index,1);
+            }
+        }
+    }
+</script>
+{% endblock %}

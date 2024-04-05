@@ -1,0 +1,13 @@
+alembic
+blinker
+click
+Flask
+Flask-Bcrypt
+Flask-Login
+Flask-Mail
+Flask-Migrate
+Flask-SQLAlchemy
+Flask-Testing
+Flask-WTF
+python-decouple
+email_validator

@@ -1,0 +1,91 @@
+
+{% extends 'base.html' %}
+{% block content%}
+<div>
+    <header >
+        <nav class="navbar d-flex flex-wrap justify-content-between px-4 py-2 navbar-dark bg-dark">
+            <a href="#" class="text-decoration-none">
+                <img src="{{url_for('static',filename='images/logo.svg')}}" alg="logo" width="40" height="40" class="d-inline-block align-text-top">
+            </a>
+            {% if current_user.is_confirmed  %}
+                <div class="col text-end">
+                    {% if current_user.is_admin == 1 %}
+                        <a class="btn btn-outline-primary me-2" href="{{ url_for('admin.viewquest') }}"> 
+                            Questions 
+                        </a>
+                    {% endif %}
+                    <a class="btn btn-outline-secondary me-2" href="{{ url_for('accounts.logout') }}">
+                         Déconnexion
+                    </a>
+                    <a class="me-3 text-secondary text-decoration-none" href="{{ url_for('session.settings') }}"> 
+                        Hello {{ current_user.firstname }}!
+                    </a>
+                </div>
+            {% else %}
+                <a href="#" class="text-decoration-none text-end" data-bs-toggle="modal" data-bs-target="#login">
+                    <svg class="bi d-block mx-auto mb-1" width="36" height="36"><use xlink:href="#people-circle"/></svg>
+                </a>
+            {% endif %}
+        </nav>
+    </header>
+    <main>
+        <div class="container col-xl-10 px-4 mt-5">
+            <div class="row align-items-center g-0">
+                <div class="col-lg-7 mb-4 ms-lg-4">
+                    <img src="{{ photo }}" class="d-block mx-auto img-fluid rounded-3 shadow-lg" alt="" width="500" height="500" loading="lazy">
+                </div>
+                <div class="col-lg-5 col-md-10 mx-md-auto ms-lg-n5">
+                    <div class="card shadow-lg">
+                    <div class="card-body">
+                        <h3 class="card-title">
+                            {{ title }}
+                        </h3>
+                        <h4 class="card-subtitle text-muted">{{ subtitle }}</h4>
+                        <p class="card-text">{{ body }}</p>
+                        <a class="btn btn-primary" href="{{ url_for('session.start')}}" >Commencer</a>
+                    </div>
+                    </div>  
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="login" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form class="needs-validation" method="post">
+                        <div class ="modal-header">
+                            <h5 class="modal-title" id="modalLabel"> Connexion </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-floating mb-3">                                
+                                <input type="text" name="email" class="form-control" id="email" placeholder="Email" required>  
+                                <label for="email"> Email </label>  
+                                <div class="invalid-feedback">
+                                    Empty user name    
+                                </div>
+                            </div>
+                            <div class="form-floating mb-3">                                
+                                <input type="password" name="password" class="form-control" id="password" placeholder="Enter Password" required>
+                                <label for="password"> Mot de passe </label>
+                                <div class="invalid-feedback">
+                                    Empty password
+                                </div>
+        
+                            </div>
+                            <div class="mb-3">
+                                <input class="form-check-input" type="checkbox" value="" id="remember">
+                                <label class="form-check-label" for="remember"> Se souvenir de moi </label>
+                                <a href="#" class="float-end"> Mot de passe oublié </a>
+                            </div>
+                        </div>                        
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            <button type="submit" class="btn btn-primary">Se connecter</button>
+                        </div>
+                        <p class="text-center"> Pas de comptes? <a href="{{ url_for('accounts.register')}}">S'inscrire</a></p>
+                    </form>
+                </div>
+            </div>
+        </div>        
+    </main>
+{% endblock %}

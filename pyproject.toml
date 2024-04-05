@@ -1,0 +1,18 @@
+[project]
+name = "bac"
+version = "1.0.0"
+description = "Bio Medical Trainer"
+dependencies = [
+    "flask",
+]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+
+[tool.coverage.run]
+branch = true
+source = ["bac"]

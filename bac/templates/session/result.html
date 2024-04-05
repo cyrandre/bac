@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content%}
+<body>
+  <div class="card shadow-lg d-flex aligns-items-center justify-content-center text-center w-50 position-absolute top-50 start-50 translate-middle">
+      <div class="card-body">
+          <h3 class="card-title">
+              Test terminé
+          </h3>
+          <h4 class="card-subtitle text-muted"></h4>
+          <p class="card-text">Score final: <span> "{{score}}/{{total}}"</span> </p>
+          <a href="{{ url_for('session.index')}}" class="btn btn-secondary">Accueil</a>
+          <a href="{{ url_for('session.start')}}" class="btn btn-primary">Recommencer</a>
+      </div>
+  </div>
+</body>
+
+{% endblock%}

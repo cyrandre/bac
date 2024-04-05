@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% block head %}
+<!-- <script src="{{url_for('static',filename ='js/alpine.min.js')}}" defer="defer"></script> --->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}
+{% block content%}
+<main>
+<div class="container col-xxl-10 px-4 py-5">
+    <form method="post" class="form" x-data="Form()" x-init="initForm({{ questions }})" @submit.prevent="submit">
+    <div class="col g-5 py-5">
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" :style="`width:${currentPc}%`" :aria-valuenow="currentPc" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+    </div>
+    <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+        <template x-if="currentQuestion.images.length === 1">
+            <div class="col-lg-6">
+                <img :src="currentQuestion.images[0].path" class="d-block mx-lg-auto img-fluid rounded-3 shadow-lg" alt="" width="700" height="500" loading="lazy"/>
+            </div>
+        </template>
+        <template x-if="currentQuestion.images.length > 1">
+            <div class="col-lg-6">
+                <div id="carousel" class="carousel slide">
+                    <div class="carousel-indicators"> 
+                        <template x-for="index in currentQuestion.images.length">
+                            <button type="button" data-bs-target="#carousel" :data-bs-slide-to="index-1" :aria-label="`Slide ${index}`" :class="index === 1 && 'active'" :aria-current="index === 1 && 'true'"></button>
+                        </template>
+                    </div>
+                    <div class="carousel-inner">
+                        <template x-for="(image,index) in currentQuestion.images">
+                        <div class="carousel-item" :class="index === 0 && 'active'">
+                            <img :src="image.path" class="d-block mx-lg-auto img-fluid rounded-3 shadow-lg" alt="" width="700" height="500" loading="lazy">
+                        </div>
+                        </template>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>                
+
+            </div>
+        </template>
+
+        <div class="col-lg-6">
+            <h1 class="display-6 fw-bold text-body-emphasis lh-1 mb-3" x-text="currentQuestion.title"></h1>
+            <p class="lead" x-text="currentQuestion.body"></p>    
+            <div class="list-group list-group-style d-grid gap-2 border-0">
+                <template x-for="(answer,index) in currentQuestion.choices" :key="index">
+                    <div class="position-relative">
+                        <input class="form-check-input position-absolute top-50 end-0 me-3 fs-5" :value="index" :type="multiAnswers() ?'checkbox':'radio'" name="listRadio" :id="`Answer${index}`" :disabled="answered">
+                        <label class="py-3 pe-5 list-group-item" :class="radioStyle(index)" :for="`Answer${index}`">
+                            <strong class="fw-semibold" x-text="answer.title"></strong>
+                        </label>
+                    </div>                        
+                </template>
+            </div>
+        </div>
+    </div>
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="submit" class="btn btn-primary px-4 me-md-2">Valider</button>
+    </div> 
+</form>   
+</div>
+</main>
+{% endblock %}
+{% block script %}
+<script>
+    function Form(){
+        return {
+            questions:[],
+            currentQuestionIndex: 0,
+            score: 0,
+            answered: false,
+            userAnswer: null,
+            answers: [],
+
+            initForm(questions){
+                this.currentQuestionIndex = 0;
+                this.score = 0;                
+                this.answered = false;
+                this.userAnswer = null;
+                this.answers = [];
+                this.loadQuestions(questions)
+            },
+            loadQuestions(input){
+                this.questions = []
+                for(item of input) {
+                    newQuestion = {
+                        title: item.title,
+                        body: item.body || '',
+                        legend: item.legend || '',
+                        multi: item.multi > 0,
+                        images: item.image,
+                        choices: item.choice,
+                        correctAnswer: item.solution || [],
+                    };
+                    this.questions.push(newQuestion)
+                }
+            },
+            get currentQuestion(){
+                return this.questions[this.currentQuestionIndex];
+            },
+            get currentPc(){
+                return this.currentQuestionIndex < this.questions.length ?
+                 (100 * this.currentQuestionIndex)/this.questions.length : 100;
+            },
+            solutionAvailable(){
+                ret = true;
+                for(q of this.questions) {
+                    ret &= q.correctAnswer.length > 0;
+                }
+                return ret;
+            },
+            currentSolutionAvailable(){
+                return this.currentQuestionIndex < this.questions.length &&
+                    this.currentQuestion.correctAnswer.length > 0;
+            },
+            testFinished(){
+                return this.currentQuestionIndex + 1 >= this.questions.length;
+            },
+            multiAnswers(){
+                return this.currentQuestion.multi || 
+                    this.currentQuestion.correctAnswer.length > 1;
+            },
+            radioStyle(index) {
+                if(!this.answered) {
+                    return ""
+                }
+                if(this.checkIndex(index)) {
+                    return "list-success-item"
+                }
+                return ""
+            },
+            checkIndex(index){
+                return this.currentQuestion.correctAnswer.includes(index)
+            },
+            checkAnswer(){
+                let check = true;
+                this.userAnswer.forEach(element => {
+                    if(!this.currentQuestion.correctAnswer.includes(element))
+                        check = false;
+                });
+                if(check){
+                    this.currentQuestion.correctAnswer.forEach(element => {
+                        if(!this.userAnswer.includes(element))
+                        check = false;
+                    })
+                }
+                return check;
+            },
+            submit(){
+                if (this.answered) return;
+                this.answered = true;
+
+                const length = this.currentQuestion.choices.length
+                this.userAnswer = [...Array(length).keys()].filter(
+                    value => document.getElementById(`Answer${value}`).checked
+                );
+                this.answers.push(this.userAnswer);
+                if(this.currentSolutionAvailable()) {
+                    if (this.checkAnswer()) {
+                        this.score += 1;
+                    }
+                    console.log(`Score: ${this.score}`)
+                    setTimeout(() => {
+                        if (this.testFinished()) {
+                            this.sendAnswers()
+                        } else {
+                            this.reset()
+                        }
+                    }, 500);
+                } else {
+                    if (this.testFinished()) {
+                            this.sendAnswers()
+                        } else {
+                            this.reset()
+                        }
+                }
+            },
+            reset(){
+                for(index = 0; index < this.currentQuestion.choices.length;++index) {
+                            document.getElementById(`Answer${index}`).checked = false;
+                        }
+                        this.currentQuestionIndex += 1;
+                        this.answered = false;
+                        this.userAnswer = null;
+            },
+            sendAnswers(){
+                let formData = new FormData();
+                if(this.solutionAvailable()){
+                    formData.append('score',this.score);
+                }
+                formData.append('answer',JSON.stringify(this.answers));
+                this.send(formData);
+            },
+            async send(formData){
+                fetch(`answer`, {
+                        method: 'POST',
+                        body: formData,
+                        })
+                try {
+                    const response = await fetch(`answer`, {
+                        method: 'POST',
+                        body: formData,
+                        })
+                    if (response.ok) {                        
+                        console.log("Submission succeeded")
+                    } else {
+                        console.error('Submission failed', response)
+                    }
+                } catch (error) {
+                    console.error('Error submitting answer', error)
+                }
+                window.location.href = "answer"                                
+            },
+        };
+    }    
+</script>
+{% endblock %}
