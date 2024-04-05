@@ -22,7 +22,7 @@ class Config(object):
   MAIL_USE_SSL = True
   MAIL_DEBUG = False
   MAIL_USERNAME = "bac.chu.dijon@gmail.com" #config("EMAIL_USER")
-  MAIL_PASSWORD = "pirl pcym adbu yvuu" #config("EMAIL_PASSWORD")
+  MAIL_PASSWORD = config("EMAIL_PASSWORD")
 
 
 class DevelopmentConfig(Config):
