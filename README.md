@@ -27,6 +27,13 @@ pip install -r requirements.txt
 
 ## Démarrage
 
+- Configuration des mails d'authentification
+  
+```
+export MAIL_USERNAME = "user@mail.com"
+export EMAIL_PASSWORD = "password"
+```  
+
 - Initialisation de la base de données
 
 ```
